@@ -7,7 +7,7 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class CPUMetricsController : ControllerBase
     {
-        [HttpGet("from/{timeFrom}/to/{timeTo}")]
+        [HttpGet("usage/from/{timeFrom}/to/{timeTo}")]
         public IActionResult GetCPUMetrics([FromRoute] TimeSpan timeFrom, [FromRoute] TimeSpan timeTo)
         {
             return Ok();

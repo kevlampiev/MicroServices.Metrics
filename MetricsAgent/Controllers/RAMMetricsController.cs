@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MetricsAgent.Controllers
 {
-    [Route("api/metrics/ram/available")]
+    [Route("api/metrics/ram")]
     [ApiController]
     public class RAMMetricsController : ControllerBase
     {
-        [HttpGet("from/{timeFrom}/to/{timeTo}")]
+        [HttpGet("available/from/{timeFrom}/to/{timeTo}")]
         public IActionResult GetRAMMetrics([FromRoute] TimeSpan timeFrom, [FromRoute] TimeSpan timeTo)
         {
             return Ok();
