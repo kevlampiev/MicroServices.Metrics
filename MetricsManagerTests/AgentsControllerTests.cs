@@ -48,12 +48,16 @@ namespace MetricsManagerTests
             Assert.IsAssignableFrom<IActionResult>(result);
         }
         
-        [Fact]
-        public void RegisterAgent_ReturnOk()
+        [Theory]
+        [InlineData(5)]
+        [InlineData(15)]
+        [InlineData(25)]
+        [InlineData(15)]
+        public void RegisterAgent_ReturnOk(int agentId)
         {
             //Подготовка данных
             MetricsManager.Models.Agent agent = new MetricsManager.Models.Agent() 
-            { AgentId = 3, AgentName = "4", Enable = true, Uri = new Uri("http://agent4.ru") };
+            { AgentId = agentId, AgentName = (agentId+1).ToString(), Enable = true, Uri = new Uri("http://agent"+agentId+".ru") };
 
             //Исполнение 
             var result = _agentsController.RegisterAgent(agent);
