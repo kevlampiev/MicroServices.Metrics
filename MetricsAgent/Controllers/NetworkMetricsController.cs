@@ -5,7 +5,7 @@ namespace MetricsAgent.Controllers
 {
     [Route("api/metrics/network")]
     [ApiController]
-    public class NetworkMerticsController : ControllerBase
+    public class NetworkMetricsController : ControllerBase
     {
         [HttpGet("from/{timeFrom}/to/{timeTo}")]
         public IActionResult GetNetworkMetrics([FromRoute] TimeSpan timeFrom, [FromRoute] TimeSpan timeTo)

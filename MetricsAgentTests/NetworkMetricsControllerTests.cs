@@ -8,24 +8,24 @@ using System.Threading.Tasks;
 
 namespace MetricsAgentTests
 {
-    public class RAMMetricsControllerTests
+    public class NetworkMetricsControllerTests
     {
-        private RAMMetricsController _controller;
+        private NetworkMetricsController _controller;
 
-        public RAMMetricsControllerTests()
+        public NetworkMetricsControllerTests()
         {
-            _controller = new RAMMetricsController();
+            _controller = new NetworkMetricsController();
         }
 
         [Fact]
-        public void GetRAMMetrics_RerurnOk()
+        public void GetNetworkMetrics_RerurnOk()
         {
             //Данные
             TimeSpan timeFrom = TimeSpan.FromSeconds(0);
             TimeSpan timeTo = TimeSpan.FromSeconds(10);
 
             //Запрос
-            var result = _controller.GetRAMMetrics(timeFrom, timeTo);
+            var result = _controller.GetNetworkMetrics(timeFrom, timeTo);
 
             //Анализ
             Assert.IsAssignableFrom<IActionResult>(result);
