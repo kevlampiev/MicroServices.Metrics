@@ -96,13 +96,13 @@ namespace MetricsAgent.Controllers
         /// </summary>
         /// <param name="id">Модель метрики</param>
         /// <returns></returns>
-        [HttpDelete("delete")]
-        public IActionResult Delete([FromRoute] HDDMetric metric)
+        [HttpDelete("delete/{id}")]
+        public IActionResult Delete([FromRoute] int id)
         {
             _logger.LogInformation("Delete HDD metric.");
             try
             {
-                _metricsRepository.Delete(metric);
+                _metricsRepository.Delete(id);
                 return Ok("Запись удалена");
             }
             catch (Exception ex)

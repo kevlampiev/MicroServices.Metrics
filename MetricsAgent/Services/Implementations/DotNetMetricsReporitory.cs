@@ -21,14 +21,14 @@ namespace MetricsAgent.Services.Implementations
             command.ExecuteNonQuery();
         }
 
-        public void Delete(DotNetMetric entity)
+        public void Delete(int metricId)
         {
             using var connection = new SQLiteConnection(ConnectionString);
             connection.Open();
 
             using var command = new SQLiteCommand(connection);
             command.CommandText = "DELETE FROM dotnetmetrics WHERE id=@id";
-            command.Parameters.AddWithValue("@id", entity.Id);
+            command.Parameters.AddWithValue("@id", metricId);
             command.Prepare();
             command.ExecuteNonQuery();
         }

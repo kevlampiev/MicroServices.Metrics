@@ -14,6 +14,15 @@ namespace MetricsAgent
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            #region Configure options
+
+            builder.Services.Configure<DatabaseOptions>(options =>
+            {
+                builder.Configuration.GetSection("Settings:DatabaseOptions").Bind(options);
+            });
+            #endregion
+
+
             #region Congigure logging
 
             builder.Host.ConfigureLogging(

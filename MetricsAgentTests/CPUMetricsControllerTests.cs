@@ -15,7 +15,7 @@ namespace MetricsAgentTests
 
         public CPUMetricsControllerTests() 
         { 
-            _controller = new CPUMetricsController();
+            _controller = new CPUMetricsController(null, null);
         }
 
         [Fact]
