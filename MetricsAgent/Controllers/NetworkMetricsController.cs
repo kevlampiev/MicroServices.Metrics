@@ -46,6 +46,17 @@ namespace MetricsAgent.Controllers
         }
 
         /// <summary>
+        /// Получение записи о метрике по id
+        /// </summary>
+        /// <param name="id">идентификатор метрики</param>
+        /// <returns>метрика с заданным id</returns>
+        [HttpGet("usage/{id}")]
+        public IActionResult GetById([FromRoute] int id)
+        {
+            return Ok(_metricsRepository.GetById(id));
+        }
+
+        /// <summary>
         /// Создание новой записи о загрузке процессора
         /// </summary>
         /// <param name="request">запрос, содержащий данные о времени и загрузке в процентах</param>

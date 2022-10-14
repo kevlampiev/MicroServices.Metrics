@@ -36,59 +36,21 @@ namespace MetricsAgent.Services.Implementations
         public IList<CPUMetric> GetAll()
         {
             using var connection = new SQLiteConnection(_databaseOptions.Value.ConnectionString);
-            connection.Open();
-
-            using var command = new SQLiteCommand(connection);
-            command.CommandText = "SELECT * FROM cpumetrics ORDER BY time";
-            var results = new List<CPUMetric>();
-
-            using (SQLiteDataReader reader = command.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    results.Add(new CPUMetric() 
-                    { 
-                        Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(1),
-                        Time = reader.GetInt32(2)
-                    });
-                }
-            }
-            return results;
+            return connection.Query<CPUMetric>("SELECT * FROM cpumetrics ORDER BY time").ToList();
         }
 
         public CPUMetric GetById(int id)
         {
             using var connection = new SQLiteConnection(_databaseOptions.Value.ConnectionString );
-            connection.Open();
-
-            using var command = new SQLiteCommand(connection);
-            command.CommandText = "SELECT * FROM cpumetrics WHERE id = @id";
-            command.Parameters.AddWithValue("@id", id); //Думаю, это не будет лишним
-            command.Prepare();
-
-            using (SQLiteDataReader reader = command.ExecuteReader())
-            {
-                if (reader.Read())
-                {
-                    return new CPUMetric()
-                    {
-                        Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(1),
-                        Time = reader.GetInt32(2)
-                    };
-                }
-                else
-                { 
-                    return null;
-                }
-            }
-            
+            return connection.QuerySingle<CPUMetric>("SELECT * FROM cpumetrics WHERE id = @id", new { Id = id});
         }
 
         public IList<CPUMetric> GetByTimePeriod(TimeSpan timeFrom, TimeSpan timeTo)
         {
             using var connection = new SQLiteConnection(_databaseOptions.Value.ConnectionString);
+            return connection.Query<CPUMetric>("SELECT * FROM cpumetrics WHERE time BETWEEN @tFrom AND @tTo ORDER BY time", 
+                new { tFrom = timeFrom.TotalSeconds, tTo = timeTo.TotalSeconds}).ToList();
+            /*
             connection.Open();
 
             using var command = new SQLiteCommand(connection);
@@ -111,20 +73,18 @@ namespace MetricsAgent.Services.Implementations
                 }
             }
             return results;
+            */
         }
 
         public void Update(CPUMetric entity)
         {
             using var connection = new SQLiteConnection(_databaseOptions.Value.ConnectionString);
-            connection.Open();
-
-            using var command = new SQLiteCommand(connection);
-            command.CommandText = "UPDATE cpumetrics SET value = @value, time = @time WHERE id=@id";
-            command.Parameters.AddWithValue("@id", entity.Id);
-            command.Parameters.AddWithValue("@time", entity.Time);
-            command.Parameters.AddWithValue("@value", entity.Value);
-            command.Prepare();
-            command.ExecuteNonQuery();
+            connection.Execute("UPDATE cpumetrics SET value = @value, time = @time WHERE id=@id",
+                new { 
+                    id = entity.Id,
+                    value = entity.Value,
+                    time = entity.Time
+                });
         }
     }
 }
