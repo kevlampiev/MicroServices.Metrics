@@ -1,3 +1,5 @@
+using AutoMapper;
+using MetricsAgent.Mappings;
 using MetricsAgent.Models;
 using MetricsAgent.Services;
 using MetricsAgent.Services.Implementations;
@@ -22,6 +24,12 @@ namespace MetricsAgent
             });
             #endregion
 
+
+            #region Configure mapping
+            var mapperConfiguration = new MapperConfiguration(mp => mp.AddProfile(new MapperProfile()));
+            var mapper = mapperConfiguration.CreateMapper();
+            builder.Services.AddSingleton(mapper);
+            #endregion
 
             #region Congigure logging
 

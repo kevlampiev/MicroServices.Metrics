@@ -3,6 +3,8 @@ using MetricsAgent.Models;
 using MetricsAgent.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
+using MetricsAgent.Models.DTO;
 
 namespace MetricsAgent.Controllers
 {
@@ -12,11 +14,15 @@ namespace MetricsAgent.Controllers
     {
         private readonly IRAMMetricsRepository _metricsRepository;
         private readonly ILogger<RAMMetricsController> _logger;
+        private readonly IMapper _mapper;
 
-        public RAMMetricsController(IRAMMetricsRepository metricsRepository, ILogger<RAMMetricsController> logger)
+        public RAMMetricsController(IRAMMetricsRepository metricsRepository, 
+            ILogger<RAMMetricsController> logger,
+            IMapper mapper)
         {
             this._metricsRepository = metricsRepository;
             _logger = logger;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -29,7 +35,7 @@ namespace MetricsAgent.Controllers
         public ActionResult<IList<RAMMetric>> GetRAMMetrics([FromRoute] TimeSpan timeFrom, [FromRoute] TimeSpan timeTo)
         {
             _logger.LogInformation("Get RAM metrics by period.");
-            return Ok(_metricsRepository.GetByTimePeriod(timeFrom, timeTo));
+            return Ok(_mapper.Map<List<RAMMetricDTO>>(_metricsRepository.GetByTimePeriod(timeFrom, timeTo)));
         }
 
         /// <summary>
@@ -42,7 +48,7 @@ namespace MetricsAgent.Controllers
         public ActionResult<IList<RAMMetric>> GetAllRAMMetrics()
         {
             _logger.LogInformation("Get all RAM metrics .");
-            return Ok(_metricsRepository.GetAll());
+            return Ok(_mapper.Map<List<RAMMetricDTO>>(_metricsRepository.GetAll()));
         }
 
         /// <summary>
@@ -53,7 +59,7 @@ namespace MetricsAgent.Controllers
         [HttpGet("usage/{id}")]
         public IActionResult GetById([FromRoute] int id)
         {
-            return Ok(_metricsRepository.GetById(id));
+            return Ok(_mapper.Map<RAMMetricDTO>(_metricsRepository.GetById(id)));
         }
 
         /// <summary>
@@ -67,11 +73,7 @@ namespace MetricsAgent.Controllers
             _logger.LogInformation("Create RAM metric.");
             try
             {
-                _metricsRepository.Create(new RAMMetric()
-                {
-                    Value = request.Value,
-                    Time = (long)request.Time.TotalSeconds
-                });
+                _metricsRepository.Create(_mapper.Map<RAMMetric>(request));
                 return Ok();
             }
             catch (Exception ex)

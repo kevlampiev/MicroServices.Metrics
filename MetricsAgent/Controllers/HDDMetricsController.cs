@@ -3,6 +3,8 @@ using MetricsAgent.Models;
 using MetricsAgent.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
+using MetricsAgent.Models.DTO;
 
 namespace MetricsAgent.Controllers
 {
@@ -12,11 +14,15 @@ namespace MetricsAgent.Controllers
     {
         private readonly IHDDMetricsRepository _metricsRepository;
         private readonly ILogger<HDDMetricsController> _logger;
+        private readonly IMapper _mapper;
 
-        public HDDMetricsController(IHDDMetricsRepository metricsRepository, ILogger<HDDMetricsController> logger)
+        public HDDMetricsController(IHDDMetricsRepository metricsRepository, 
+            ILogger<HDDMetricsController> logger,
+            IMapper mapper)
         {
             this._metricsRepository = metricsRepository;
             _logger = logger;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -29,7 +35,7 @@ namespace MetricsAgent.Controllers
         public ActionResult<IList<HDDMetric>> GetHDDMetrics([FromRoute] TimeSpan timeFrom, [FromRoute] TimeSpan timeTo)
         {
             _logger.LogInformation("Get HDD metrics by period.");
-            return Ok(_metricsRepository.GetByTimePeriod(timeFrom, timeTo));
+            return Ok(_mapper.Map<List<HDDMetricDTO>>(_metricsRepository.GetByTimePeriod(timeFrom, timeTo)));
         }
 
         /// <summary>
@@ -42,7 +48,7 @@ namespace MetricsAgent.Controllers
         public ActionResult<IList<HDDMetric>> GetAllHDDMetrics()
         {
             _logger.LogInformation("Get all HDD metrics .");
-            return Ok(_metricsRepository.GetAll());
+            return Ok(_mapper.Map<List<HDDMetricDTO>>(_metricsRepository.GetAll()));
         }
 
         /// <summary>
@@ -53,7 +59,7 @@ namespace MetricsAgent.Controllers
         [HttpGet("left/{id}")]
         public IActionResult GetById([FromRoute] int id)
         {
-            return Ok(_metricsRepository.GetById(id));
+            return Ok(_mapper.Map<HDDMetricDTO>(_metricsRepository.GetById(id)));
         }
 
         /// <summary>
@@ -67,11 +73,7 @@ namespace MetricsAgent.Controllers
             _logger.LogInformation("Create HDD metric.");
             try
             {
-                _metricsRepository.Create(new HDDMetric()
-                {
-                    Value = request.Value,
-                    Time = (long)request.Time.TotalSeconds
-                });
+                _metricsRepository.Create(_mapper.Map<HDDMetric>(request));
                 return Ok();
             }
             catch (Exception ex)
