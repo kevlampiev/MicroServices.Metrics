@@ -3,6 +3,8 @@ using MetricsAgent.Models;
 using MetricsAgent.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using AutoMapper;
+using MetricsAgent.Models.DTO;
 
 namespace MetricsAgent.Controllers
 {
@@ -12,11 +14,15 @@ namespace MetricsAgent.Controllers
     {
         private readonly IDotNetMetricsRepository _metricsRepository;
         private readonly ILogger<DotNetMetricsController> _logger;
+        private readonly IMapper _mapper;
 
-        public DotNetMetricsController(IDotNetMetricsRepository metricsRepository, ILogger<DotNetMetricsController> logger)
+        public DotNetMetricsController(IDotNetMetricsRepository metricsRepository, 
+            ILogger<DotNetMetricsController> logger,
+            IMapper mapper)
         {
             this._metricsRepository = metricsRepository;
             _logger = logger;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -29,7 +35,7 @@ namespace MetricsAgent.Controllers
         public ActionResult<IList<DotNetMetric>> GetDotNetMetrics([FromRoute] TimeSpan timeFrom, [FromRoute] TimeSpan timeTo)
         {
             _logger.LogInformation("Get DotNet metrics by period.");
-            return Ok(_metricsRepository.GetByTimePeriod(timeFrom, timeTo));
+            return Ok(_mapper.Map<List<DotNetMetricDTO>>(_metricsRepository.GetByTimePeriod(timeFrom, timeTo)));
         }
 
         /// <summary>
@@ -42,7 +48,18 @@ namespace MetricsAgent.Controllers
         public ActionResult<IList<DotNetMetric>> GetAllDotNetMetrics()
         {
             _logger.LogInformation("Get all DotNet metrics .");
-            return Ok(_metricsRepository.GetAll());
+            return Ok(_mapper.Map<List<DotNetMetricDTO>>(_metricsRepository.GetAll()));
+        }
+
+        /// <summary>
+        /// Получение записи о метрике по id
+        /// </summary>
+        /// <param name="id">идентификатор метрики</param>
+        /// <returns>метрика с заданным id</returns>
+        [HttpGet("error-count/{id}")]
+        public IActionResult GetById([FromRoute] int id)
+        {
+            return Ok(_mapper.Map<DotNetMetricDTO>(_metricsRepository.GetById(id)));
         }
 
         /// <summary>
@@ -56,11 +73,14 @@ namespace MetricsAgent.Controllers
             _logger.LogInformation("Create DotNet metric.");
             try
             {
-                _metricsRepository.Create(new DotNetMetric()
+                _metricsRepository.Create(_mapper.Map<DotNetMetric>(request));
+                    /*
+                    new DotNetMetric()
                 {
                     Value = request.Value,
                     Time = (long)request.Time.TotalSeconds
                 });
+                    */
                 return Ok();
             }
             catch (Exception ex)
@@ -96,13 +116,13 @@ namespace MetricsAgent.Controllers
         /// </summary>
         /// <param name="id">Модель метрики</param>
         /// <returns></returns>
-        [HttpDelete("delete")]
-        public IActionResult Delete([FromRoute] DotNetMetric metric)
+        [HttpDelete("delete/{id}")]
+        public IActionResult Delete([FromRoute] int id)
         {
             _logger.LogInformation("Delete DotNet metric.");
             try
             {
-                _metricsRepository.Delete(metric);
+                _metricsRepository.Delete(id);
                 return Ok("Запись удалена");
             }
             catch (Exception ex)

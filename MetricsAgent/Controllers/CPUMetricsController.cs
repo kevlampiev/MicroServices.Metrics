@@ -1,4 +1,6 @@
-﻿using MetricsAgent.Models;
+﻿using AutoMapper;
+using MetricsAgent.Models;
+using MetricsAgent.Models.DTO;
 using MetricsAgent.Models.Requests;
 using MetricsAgent.Services;
 using Microsoft.AspNetCore.Http;
@@ -12,11 +14,15 @@ namespace MetricsAgent.Controllers
     {
         private readonly ICPUMetricsRepository _metricsRepository;
         private readonly ILogger<CPUMetricsController> _logger;
+        private readonly IMapper _mapper;
 
-        public CPUMetricsController(ICPUMetricsRepository metricsRepository, ILogger<CPUMetricsController> logger)
+        public CPUMetricsController(ICPUMetricsRepository metricsRepository, 
+            ILogger<CPUMetricsController> logger,
+            IMapper mapper)
         {
             this._metricsRepository = metricsRepository;
             _logger = logger;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -29,7 +35,7 @@ namespace MetricsAgent.Controllers
         public ActionResult<IList<CPUMetric>> GetCPUMetrics([FromRoute] TimeSpan timeFrom, [FromRoute] TimeSpan timeTo)
         {
             _logger.LogInformation("Get CPU metrics by period.");
-            return Ok(_metricsRepository.GetByTimePeriod(timeFrom, timeTo));
+            return Ok(_mapper.Map<List<CPUMetricDTO>>(_metricsRepository.GetByTimePeriod(timeFrom, timeTo)));
         }
 
         /// <summary>
@@ -42,7 +48,19 @@ namespace MetricsAgent.Controllers
         public ActionResult<IList<CPUMetric>> GetAllCPUMetrics()
         {
             _logger.LogInformation("Get all CPU metrics .");
-            return Ok(_metricsRepository.GetAll());
+            return Ok(_mapper.Map<List<CPUMetricDTO>>(_metricsRepository.GetAll()));
+        }
+
+        /// <summary>
+        /// Получение записи о метрике по id
+        /// </summary>
+        /// <param name="id">идентификатор метрики</param>
+        /// <returns>метрика с заданным id</returns>
+        [HttpGet("usage/{id}")]
+        public IActionResult GetById([FromRoute] int id)
+        {
+            _logger.LogInformation($"Get CPU metric with id = {id} .");
+            return Ok(_mapper.Map<CPUMetricDTO>(_metricsRepository.GetById(id)));
         }
 
         /// <summary>
@@ -56,11 +74,15 @@ namespace MetricsAgent.Controllers
             _logger.LogInformation("Create CPU metric.");
             try
             {
-                _metricsRepository.Create(new CPUMetric()
+                _metricsRepository.Create(_mapper.Map<CPUMetric>(request));
+
+                    /*
+                    new CPUMetric()
                 {
                     Value = request.Value,
                     Time = (long)request.Time.TotalSeconds
                 });
+                    */
                 return Ok();
             }
             catch (Exception ex)
@@ -96,13 +118,13 @@ namespace MetricsAgent.Controllers
         /// </summary>
         /// <param name="id">Модель метрики</param>
         /// <returns></returns>
-        [HttpDelete("delete")]
-        public IActionResult Delete([FromRoute] CPUMetric metric)
+        [HttpDelete("delete/{id}")]
+        public IActionResult Delete([FromRoute] int id)
         {
             _logger.LogInformation("Delete CPU metric.");
             try
             {
-                _metricsRepository.Delete(metric);
+                _metricsRepository.Delete(id);
                 return Ok("Запись удалена");
             }
             catch (Exception ex)
