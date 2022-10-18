@@ -1,4 +1,5 @@
 using AutoMapper;
+using FluentMigrator.Runner;
 using MetricsAgent.Mappings;
 using MetricsAgent.Models;
 using MetricsAgent.Services;
@@ -23,6 +24,12 @@ namespace MetricsAgent
                 builder.Configuration.GetSection("Settings:DatabaseOptions").Bind(options);
             });
             #endregion
+
+            builder.Services.AddFluentMigratorCore()
+                .ConfigureRunner(rb => rb.AddSQLite()
+                .WithGlobalConnectionString(builder.Configuration["Settings:DatabaseOptions:ConnectionString"].ToString())
+                .ScanIn(typeof(Program).Assembly).For.Migrations()
+                ).AddLogging(lb => lb.AddFluentMigratorConsole());
 
 
             #region Configure mapping
@@ -59,8 +66,8 @@ namespace MetricsAgent
             builder.Services.AddScoped<INetworkMetricsRepository, NetworkMetricsReporitory>();
             builder.Services.AddScoped<IRAMMetricsRepository, RAMMetricsReporitory>();
             #endregion
+
             
-            ConfigureSqlLiteConnection();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -91,54 +98,62 @@ namespace MetricsAgent
 
             app.MapControllers();
 
+            var serviceScopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+            using (IServiceScope serviceScope = serviceScopeFactory.CreateScope())
+            {
+                var migrationRunner = serviceScope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+                migrationRunner.MigrateUp();
+
+            }
+
             app.Run();
         }
 
-        public static void ConfigureSqlLiteConnection()
-        {
-           // if (File.Exists("metrics.db")) 
-           // {
-           //     return;
-           // }
-            const string connectionString = "Data Source = metrics.db; Version = 3; Pooling = true; Max Pool Size = 100;";
-            var connection = new SQLiteConnection(connectionString);
-            connection.Open();
-            PrepareSchema(connection);
-        }
+        //public static void ConfigureSqlLiteConnection()
+        //{
+        //   // if (File.Exists("metrics.db")) 
+        //   // {
+        //   //     return;
+        //   // }
+        //    const string connectionString = "Data Source = metrics.db; Version = 3; Pooling = true; Max Pool Size = 100;";
+        //    var connection = new SQLiteConnection(connectionString);
+        //    connection.Open();
+        //    PrepareSchema(connection);
+        //}
 
-        private static void PrepareSchema(SQLiteConnection connection)
-        {
-            using (var command = new SQLiteCommand(connection))
-            {
-                //command.CommandText = "DROP TABLE IF EXISTS cpumetrics";
-                //command.ExecuteNonQuery();
+//        private static void PrepareSchema(SQLiteConnection connection)
+//        {
+//            using (var command = new SQLiteCommand(connection))
+//            {
+//                //command.CommandText = "DROP TABLE IF EXISTS cpumetrics";
+//                //command.ExecuteNonQuery();
 
-                command.CommandText = GetCreateTableCommand("cpumetrics");
-                command.ExecuteNonQuery(); 
-                command.CommandText = GetCreateTableCommand("dotnetmetrics");
-                command.ExecuteNonQuery(); 
-                command.CommandText = GetCreateTableCommand("hddmetrics");
-                command.ExecuteNonQuery(); 
-                command.CommandText = GetCreateTableCommand("networkmetrics");
-                command.ExecuteNonQuery(); 
-                command.CommandText = GetCreateTableCommand("rammetrics");
-                command.ExecuteNonQuery(); 
+//                command.CommandText = GetCreateTableCommand("cpumetrics");
+//                command.ExecuteNonQuery(); 
+//                command.CommandText = GetCreateTableCommand("dotnetmetrics");
+//                command.ExecuteNonQuery(); 
+//                command.CommandText = GetCreateTableCommand("hddmetrics");
+//                command.ExecuteNonQuery(); 
+//                command.CommandText = GetCreateTableCommand("networkmetrics");
+//                command.ExecuteNonQuery(); 
+//                command.CommandText = GetCreateTableCommand("rammetrics");
+//                command.ExecuteNonQuery(); 
 
-/*                
-                command.CommandText =
-                    @"CREATE TABLE IF NOT EXISTS dotnetmetrics(id INTEGER
-                      PRIMARY KEY,
-                        value INT, time INT)";
-                command.ExecuteNonQuery();
-*/
-            }
+///*                
+//                command.CommandText =
+//                    @"CREATE TABLE IF NOT EXISTS dotnetmetrics(id INTEGER
+//                      PRIMARY KEY,
+//                        value INT, time INT)";
+//                command.ExecuteNonQuery();
+//*/
+//            }
         
-        }
+        //}
 
-        private static string GetCreateTableCommand(string tabName) 
-        {
-            return $"CREATE TABLE IF NOT EXISTS {tabName} (id INTEGER PRIMARY KEY, value INT, time INT)";
-        }
+        //private static string GetCreateTableCommand(string tabName) 
+        //{
+        //    return $"CREATE TABLE IF NOT EXISTS {tabName} (id INTEGER PRIMARY KEY, value INT, time INT)";
+        //}
             
     }
 }
