@@ -51,79 +51,79 @@ namespace MetricsAgent.Controllers
             return Ok(_mapper.Map<List<HDDMetricDTO>>(_metricsRepository.GetAll()));
         }
 
-        /// <summary>
-        /// Получение записи о метрике по id
-        /// </summary>
-        /// <param name="id">идентификатор метрики</param>
-        /// <returns>метрика с заданным id</returns>
-        [HttpGet("left/{id}")]
-        public IActionResult GetById([FromRoute] int id)
-        {
-            return Ok(_mapper.Map<HDDMetricDTO>(_metricsRepository.GetById(id)));
-        }
+        ///// <summary>
+        ///// Получение записи о метрике по id
+        ///// </summary>
+        ///// <param name="id">идентификатор метрики</param>
+        ///// <returns>метрика с заданным id</returns>
+        //[HttpGet("left/{id}")]
+        //public IActionResult GetById([FromRoute] int id)
+        //{
+        //    return Ok(_mapper.Map<HDDMetricDTO>(_metricsRepository.GetById(id)));
+        //}
 
-        /// <summary>
-        /// Создание новой записи о загрузке процессора
-        /// </summary>
-        /// <param name="request">запрос, содержащий данные о времени и загрузке в процентах</param>
-        /// <returns></returns>
-        [HttpPost("create")]
-        public IActionResult Create([FromBody] HDDMetricCreateRequest request)
-        {
-            _logger.LogInformation("Create HDD metric.");
-            try
-            {
-                _metricsRepository.Create(_mapper.Map<HDDMetric>(request));
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogInformation("Error with creating HDD metric.");
-                return BadRequest(ex.Message);
-            }
-        }
+        ///// <summary>
+        ///// Создание новой записи о загрузке процессора
+        ///// </summary>
+        ///// <param name="request">запрос, содержащий данные о времени и загрузке в процентах</param>
+        ///// <returns></returns>
+        //[HttpPost("create")]
+        //public IActionResult Create([FromBody] HDDMetricCreateRequest request)
+        //{
+        //    _logger.LogInformation("Create HDD metric.");
+        //    try
+        //    {
+        //        _metricsRepository.Create(_mapper.Map<HDDMetric>(request));
+        //        return Ok();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogInformation("Error with creating HDD metric.");
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
 
-        /// <summary>
-        /// Редактирование записи
-        /// </summary>
-        /// <param name="metric">модель метрики</param>
-        /// <returns></returns>
-        [HttpPut("update")]
-        public IActionResult Update([FromBody] HDDMetric metric)
-        {
-            _logger.LogInformation("Update HDD metric.");
-            try
-            {
-                _metricsRepository.Update(metric);
-                return Ok("Запись обновлена");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogInformation("Error with updating HDD metric.");
-                return BadRequest(ex.Message); //Лучше, чем ничего
-            }
-        }
+        ///// <summary>
+        ///// Редактирование записи
+        ///// </summary>
+        ///// <param name="metric">модель метрики</param>
+        ///// <returns></returns>
+        //[HttpPut("update")]
+        //public IActionResult Update([FromBody] HDDMetric metric)
+        //{
+        //    _logger.LogInformation("Update HDD metric.");
+        //    try
+        //    {
+        //        _metricsRepository.Update(metric);
+        //        return Ok("Запись обновлена");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogInformation("Error with updating HDD metric.");
+        //        return BadRequest(ex.Message); //Лучше, чем ничего
+        //    }
+        //}
 
-        /// <summary>
-        /// Удаление метрики
-        /// </summary>
-        /// <param name="id">Модель метрики</param>
-        /// <returns></returns>
-        [HttpDelete("delete/{id}")]
-        public IActionResult Delete([FromRoute] int id)
-        {
-            _logger.LogInformation("Delete HDD metric.");
-            try
-            {
-                _metricsRepository.Delete(id);
-                return Ok("Запись удалена");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogInformation("Error with deleting HDD metric.");
-                return BadRequest(ex.Message); //Лучше, чем ничего
-            }
-        }
+        ///// <summary>
+        ///// Удаление метрики
+        ///// </summary>
+        ///// <param name="id">Модель метрики</param>
+        ///// <returns></returns>
+        //[HttpDelete("delete/{id}")]
+        //public IActionResult Delete([FromRoute] int id)
+        //{
+        //    _logger.LogInformation("Delete HDD metric.");
+        //    try
+        //    {
+        //        _metricsRepository.Delete(id);
+        //        return Ok("Запись удалена");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogInformation("Error with deleting HDD metric.");
+        //        return BadRequest(ex.Message); //Лучше, чем ничего
+        //    }
+        //}
 
     }
 }
