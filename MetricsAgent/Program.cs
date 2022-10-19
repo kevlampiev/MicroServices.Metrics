@@ -1,5 +1,7 @@
 using AutoMapper;
 using FluentMigrator.Runner;
+using MetricsAgent.Job;
+using MetricsAgent.Jobs;
 using MetricsAgent.Mappings;
 using MetricsAgent.Models;
 using MetricsAgent.Services;
@@ -7,6 +9,9 @@ using MetricsAgent.Services.Implementations;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using NLog.Web;
+using Quartz;
+using Quartz.Impl;
+using Quartz.Spi;
 using System.Data.SQLite;
 
 namespace MetricsAgent
@@ -30,6 +35,23 @@ namespace MetricsAgent
                 .WithGlobalConnectionString(builder.Configuration["Settings:DatabaseOptions:ConnectionString"].ToString())
                 .ScanIn(typeof(Program).Assembly).For.Migrations()
                 ).AddLogging(lb => lb.AddFluentMigratorConsole());
+
+
+
+            builder.Services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+            builder.Services.AddSingleton<IJobFactory, SingletonJobFactory>();
+            builder.Services.AddSingleton<CPUMetricJob>();
+            builder.Services.AddSingleton(new JobSchedule(typeof(CPUMetricJob),"0/5 * * ? * * *"));
+            builder.Services.AddSingleton<DotNetMetricJob>();
+            builder.Services.AddSingleton(new JobSchedule(typeof(DotNetMetricJob), "0/5 * * ? * * *"));
+            builder.Services.AddSingleton<HDDMetricJob>();
+            builder.Services.AddSingleton(new JobSchedule(typeof(HDDMetricJob), "0/5 * * ? * * *"));
+            builder.Services.AddSingleton<NetworkMetricJob>();
+            builder.Services.AddSingleton(new JobSchedule(typeof(NetworkMetricJob), "0/5 * * ? * * *"));
+            builder.Services.AddSingleton<RAMMetricJob>();
+            builder.Services.AddSingleton(new JobSchedule(typeof(RAMMetricJob), "0/5 * * ? * * *"));
+
+            builder.Services.AddHostedService<QuartzHostedService>();
 
 
             #region Configure mapping
@@ -60,11 +82,11 @@ namespace MetricsAgent
             // Add services to the container.
 
             #region MetricsRepositories
-            builder.Services.AddScoped<ICPUMetricsRepository, CPUMetricsReporitory>();
-            builder.Services.AddScoped<IDotNetMetricsRepository, DotNetMetricsReporitory>();
-            builder.Services.AddScoped<IHDDMetricsRepository, HDDMetricsReporitory>();
-            builder.Services.AddScoped<INetworkMetricsRepository, NetworkMetricsReporitory>();
-            builder.Services.AddScoped<IRAMMetricsRepository, RAMMetricsReporitory>();
+            builder.Services.AddSingleton<ICPUMetricsRepository, CPUMetricsReporitory>();
+            builder.Services.AddSingleton<IDotNetMetricsRepository, DotNetMetricsReporitory>();
+            builder.Services.AddSingleton<IHDDMetricsRepository, HDDMetricsReporitory>();
+            builder.Services.AddSingleton<INetworkMetricsRepository, NetworkMetricsReporitory>();
+            builder.Services.AddSingleton<IRAMMetricsRepository, RAMMetricsReporitory>();
             #endregion
 
             
